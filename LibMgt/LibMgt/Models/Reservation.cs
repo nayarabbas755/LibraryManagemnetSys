@@ -5,15 +5,18 @@ namespace LibMgt.Models
 {
     public class Reservation:BaseEntity
     {
-     
+
         public Guid BookID { get; set; }
         [ForeignKey("BookID")]
-        public Book Book { get; set; }
+        public virtual Book Book { get; set; }
         public Guid PatronID { get; set; }
-        [ForeignKey("PartronID")]
-        public Patron Patron { get; set; }
+        [ForeignKey("PatronID")]
+        public virtual Patron Patron { get; set; }
         public DateTime? ReservationDate { get; set; }
         public string? Status { get; set; }
         public string? OtherDetails { get; set; }
+        public Guid UserID { get; set; }
+        [ForeignKey("UserID")]
+        public virtual User User { get; set; }
     }
 }

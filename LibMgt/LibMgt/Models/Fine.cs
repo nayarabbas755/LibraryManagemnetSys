@@ -5,9 +5,10 @@ namespace LibMgt.Models
 {
     public class Fine:BaseEntity
     {
-        public int PatronID { get; set; }
-        [ForeignKey("PartronID")]
-        public Patron Patron { get; set; }  
+ 
+        public Guid PatronID { get; set; }
+        [ForeignKey("PatronID")]
+        public virtual Patron Patron { get; set; }
         public decimal? FineAmount { get; set; }
         public DateTime? FineDate { get; set; }
         public string? Status { get; set; }

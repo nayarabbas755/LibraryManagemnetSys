@@ -7,10 +7,10 @@ namespace LibMgt.Models
     {
         public Guid BookID { get; set; }
         [ForeignKey("BookID")]
-        public Book Book { get; set; }
+        public virtual Book Book { get; set; }
         public Guid PatronID { get; set; }
-        [ForeignKey("PartronID")]
-        public Patron Patron { get; set; }
+        [ForeignKey("PatronID")]
+        public virtual Patron Patron { get; set; }
         public string? TransactionType { get; set; }
         public DateTime? TransactionDate { get; set; }
         public DateTime? DueDate { get; set; }

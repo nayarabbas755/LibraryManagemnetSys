@@ -20,9 +20,10 @@ namespace LibMgt
             services.AddControllers();
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
-            services.AddDbContext<LibraryDbContext>(options =>
+            services.AddAuthorization();    
+            services.AddEntityFrameworkSqlite().AddDbContext<LibraryDbContext>(options =>
             {
-                options.UseSqlServer(configuration.GetConnectionString("connection"));
+                options.UseSqlite(configuration.GetConnectionString("connection"));
             });
             services.AddIdentity<User, Role>(options =>
             {
@@ -49,6 +50,7 @@ namespace LibMgt
                  options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                  options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
              })
+                //.AddCookie(cfg => cfg.SlidingExpiration = true)
                 .AddJwtBearer(options =>
                 {
                     options.TokenValidationParameters = new TokenValidationParameters
@@ -82,7 +84,7 @@ namespace LibMgt
                                 Id="Bearer",
                                 Type=ReferenceType.SecurityScheme
                             },
-
+                            
                         },new List<string>()
                     }
                 });

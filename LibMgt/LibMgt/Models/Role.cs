@@ -9,5 +9,6 @@ namespace LibMgt.Models
         public bool IsDeleted { get; set; } = false;
         public DateTime? LastModifiedTime { get; set; } = null;
         public DateTime? DeletionTIme { get; set; } = null;
+
     }
 }
