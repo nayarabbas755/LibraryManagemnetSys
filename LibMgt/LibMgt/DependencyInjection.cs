@@ -1,9 +1,15 @@
 ﻿
 using LibMgt.LibDbContext;
 using LibMgt.Models;
+using LibMgt.ServiceModels;
+using LibMgt.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System;
+using System.Text;
 
 namespace LibMgt
 {
@@ -20,14 +26,42 @@ namespace LibMgt
             });
             services.AddIdentity<User, Role>(options =>
             {
-                options.Tokens.EmailConfirmationTokenProvider = TokenOptions.DefaultProvider;
-                options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultProvider;
+                options.Tokens.EmailConfirmationTokenProvider = TokenOptions.DefaultEmailProvider;
+                options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultEmailProvider;
                 options.Tokens.ChangeEmailTokenProvider = TokenOptions.DefaultEmailProvider;
-                options.SignIn.RequireConfirmedPhoneNumber = false;
-                options.SignIn.RequireConfirmedEmail = false;
-                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.SignIn.RequireConfirmedAccount = true;
+                options.User.RequireUniqueEmail = true;
+                options.Lockout.MaxFailedAccessAttempts = 7;
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireNonAlphanumeric = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequiredLength = 8;
+                options.Password.RequiredUniqueChars = 1;
+            }).AddEntityFrameworkStores<LibraryDbContext>().AddDefaultTokenProviders();
 
-            }).AddEntityFrameworkStores<LibraryDbContext>().AddTokenProvider<DataProtectorTokenProvider<User>>(TokenOptions.DefaultEmailProvider);
+            services.AddScoped<ValidationService>();
+            services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
+            services.AddScoped<EmailService>();
+            services.AddScoped<JWTService>();
+            services.AddAuthentication(options =>
+             {
+                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+             })
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = configuration["Jwt:Issuer"],
+                        ValidAudience = configuration["Jwt:Issuer"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]))
+                    };
+                });
             services.AddSwaggerGen(c =>
             {
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme

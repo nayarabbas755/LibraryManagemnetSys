@@ -63,7 +63,7 @@ namespace LibMgt.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Books");
+                    b.ToTable("Books", (string)null);
                 });
 
             modelBuilder.Entity("LibMgt.Models.Fine", b =>
@@ -106,7 +106,7 @@ namespace LibMgt.Migrations
 
                     b.HasIndex("PartronID");
 
-                    b.ToTable("Fines");
+                    b.ToTable("Fines", (string)null);
                 });
 
             modelBuilder.Entity("LibMgt.Models.Genre", b =>
@@ -141,7 +141,7 @@ namespace LibMgt.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Genres");
+                    b.ToTable("Genres", (string)null);
                 });
 
             modelBuilder.Entity("LibMgt.Models.Patron", b =>
@@ -179,7 +179,7 @@ namespace LibMgt.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Patrons");
+                    b.ToTable("Patrons", (string)null);
                 });
 
             modelBuilder.Entity("LibMgt.Models.Reservation", b =>
@@ -224,7 +224,7 @@ namespace LibMgt.Migrations
 
                     b.HasIndex("PartronID");
 
-                    b.ToTable("Reservations");
+                    b.ToTable("Reservations", (string)null);
                 });
 
             modelBuilder.Entity("LibMgt.Models.Role", b =>
@@ -318,7 +318,7 @@ namespace LibMgt.Migrations
 
                     b.HasIndex("PartronID");
 
-                    b.ToTable("Transactions");
+                    b.ToTable("Transactions", (string)null);
                 });
 
             modelBuilder.Entity("LibMgt.Models.User", b =>
