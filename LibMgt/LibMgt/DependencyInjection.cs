@@ -89,6 +89,8 @@ namespace LibMgt
                     }
                 });
             });
+            var service = services.BuildServiceProvider();
+            service.GetService<LibraryDbContext>().Database.Migrate();
             return services;
         }
     }
