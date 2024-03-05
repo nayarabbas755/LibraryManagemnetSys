@@ -28,11 +28,11 @@ namespace LibMgt.Controllers
 
         [HttpPost("CreateBook")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> CreateBook(TransactionCreateRequest book)
+        public async Task<IActionResult> CreateBook(BookCreateRequest book)
         {
             try
             {
-                 _ValidationService.ValidateTransactionCreateRequest(book);
+                 _ValidationService.ValidateBookCreateRequest(book);
                 var _book = new Book()
                 {
                     Title = book.Title,
@@ -119,7 +119,7 @@ namespace LibMgt.Controllers
  
         [HttpPut( "update")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateDeleteBook(UpdateTransactionRequest request)
+        public async Task<IActionResult> UpdateDeleteBook(UpdateBookRequest request)
         {
             try
             {

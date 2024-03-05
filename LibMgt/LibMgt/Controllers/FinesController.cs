@@ -9,6 +9,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LibMgt.Controllers
 {
+
+    public record FineCreateRequest(Guid PatronID,decimal? FineAmount,DateTime? FineDate,string? Status,string? OtherDetails);
+    public record UpdateFineRequest(Guid Id,Guid? PatronID,decimal? FineAmount,DateTime? FineDate,string? Status,string? OtherDetails,bool? IsDeleted);
     [ApiController]
     [Route("api/fine/[controller]")]
     public class FinesController : ControllerBase
@@ -121,7 +124,7 @@ namespace LibMgt.Controllers
             try
             {
                 bool check = false;
-                if(!_ValidationService.ValidateString(request.Id.ToString()))
+                if (!_ValidationService.ValidateString(request.Id.ToString()))
                 {
                     _logger.LogError("Id is required" + DateTime.UtcNow.ToString());
                     return BadRequest(new
@@ -131,7 +134,7 @@ namespace LibMgt.Controllers
                 }
 
                 Fine fine = await _context.Fines.Where(x => x.Id == request.Id).FirstOrDefaultAsync();
-                if(fine == null)
+                if (fine == null)
                 {
                     _logger.LogError("fine not found" + DateTime.UtcNow.ToString());
                     return NotFound(new
@@ -139,27 +142,35 @@ namespace LibMgt.Controllers
                         Message = "fine not found"
                     });
                 }
-                if (_ValidationService.ValidateString(request.Title))
+                if (request.PatronID!=null)
                 {
-                    if (!fine.FineAmount.Equals(request.Title))
+                    if (!fine.PatronID.ToString().Equals(request.PatronID.ToString()))
                     {
-                        fine.FineAmount = request.Title;
+                        fine.PatronID = (Guid)request.PatronID;
                         check = true;
                     }
                 }
-                if (_ValidationService.ValidateString(request.ISBN))
+                if (_ValidationService.ValidateDecimal(request.FineAmount))
                 {
-                    if (!fine.FineDate.Equals(request.ISBN))
+                    if (!fine.FineAmount.Equals(request.FineAmount))
                     {
-                        fine.FineDate = request.ISBN;
+                        fine.FineAmount = request.FineAmount;
                         check = true;
                     }
                 }
-                if (_ValidationService.ValidateString(request.Author))
+                if (_ValidationService.ValidateDateTime(request.FineDate))
                 {
-                    if (!fine.Status.Equals(request.Author))
+                    if (!fine.FineDate.Equals(request.FineDate))
                     {
-                        fine.Status = request.Author;
+                        fine.FineDate = request.FineDate;
+                        check = true;
+                    }
+                }
+                if (_ValidationService.ValidateString(request.Status))
+                {
+                    if (!fine.Status.Equals(request.Status))
+                    {
+                        fine.Status = request.Status;
                         check = true;
                     }
                 }
@@ -172,10 +183,10 @@ namespace LibMgt.Controllers
                         check = true;
                     }
                 }
-                if (request.IsDeleted!=null)
+                if (request.IsDeleted != null)
                 {
-                    fine.IsDeleted=(bool)request.IsDeleted;
-                    if (request.IsDeleted==true)
+                    fine.IsDeleted = (bool)request.IsDeleted;
+                    if (request.IsDeleted == true)
                     {
                         fine.DeletionTIme = DateTime.UtcNow;
                         check = true;
@@ -188,7 +199,7 @@ namespace LibMgt.Controllers
                         check = true;
                     }
                 }
-                
+
                 if (check)
                 {
                     fine.LastModifiedTime = DateTime.UtcNow;
@@ -196,7 +207,7 @@ namespace LibMgt.Controllers
                     await _context.SaveChangesAsync();
                     _logger.LogInformation("fine" +
                         " updated " + DateTime.UtcNow.ToString());
-                   
+
                 }
                 return Ok(new
                 {

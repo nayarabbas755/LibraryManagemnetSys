@@ -1,6 +1,6 @@
 ﻿namespace LibMgt.FrontEndRequests
 {
-    public record UpdateTransactionRequest
+    public record UpdateBookRequest
   (     
          Guid Id,
          string? Title,

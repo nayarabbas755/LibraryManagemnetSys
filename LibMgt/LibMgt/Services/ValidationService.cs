@@ -36,6 +36,14 @@ namespace LibMgt.Services
             }
             return true;
         }
+        public bool ValidateDecimal(decimal? text)
+        {
+            if (text==null)
+            {
+                return false;
+            }
+            return true;
+        }
         public bool ValidateUserName(string userName)
         {
             if (string.IsNullOrEmpty(userName) || string.IsNullOrWhiteSpace(userName))
@@ -60,6 +68,61 @@ namespace LibMgt.Services
                 throw new ArgumentException("UserName is required");
             };
          
+        }
+        public void ValidateGenreRequest(CreateGenreRequest request)
+        {
+            if (!ValidateString(request.GenreName))
+            {
+                throw new ArgumentException("GenreName is required");
+            };
+
+            if (!ValidateString(request.Description))
+            {
+                throw new ArgumentException("Description is required");
+            };
+
+            if (!ValidateString(request.OtherDetails))
+            {
+                throw new ArgumentException("OtherDetails is required");
+            };
+
+        }
+        public void ValidateBookCreateRequest(BookCreateRequest request)
+        {
+
+            if (!ValidateString(request.Title))
+            {
+                throw new ArgumentException("Title is required");
+            };
+
+            if (!ValidateString(request.Author))
+            {
+                throw new ArgumentException("Author is required");
+            };
+
+            if (!ValidateString(request.ISBN))
+            {
+                throw new ArgumentException("ISBN is required");
+            };
+
+            if (!ValidateString(request.Genre))
+            {
+                throw new ArgumentException("Genre is required");
+            };
+            if (!ValidateDateTime(request.PublicationDate))
+            {
+                throw new ArgumentException("PublicationDate is required");
+            };
+            if (!ValidateString(request.AvailabilityStatus))
+            {
+                throw new ArgumentException("AvailabilityStatus is required");
+            };
+            if (!ValidateString(request.OtherDetails))
+            {
+                throw new ArgumentException("OtherDetails is required");
+            };
+
+
         }
         public void ValidateCreateReservationRequest(CreateReservationRequest request)
         {
@@ -121,37 +184,17 @@ namespace LibMgt.Services
         public void ValidateTransactionCreateRequest(TransactionCreateRequest request)
         {
            
-            if (!ValidateString(request.Title))
+            if (request.BookID==null)
             {
-                throw new ArgumentException("Title is required");
+                throw new ArgumentException("BookID is required");
             };
        
-            if (!ValidateString(request.Author))
+            if (request.PatronID == null)
             {
-                throw new ArgumentException("Author is required");
+                throw new ArgumentException("PatronID is required");
             };
        
-            if (!ValidateString(request.ISBN))
-            {
-                throw new ArgumentException("ISBN is required");
-            };
-       
-            if (!ValidateString(request.Genre))
-            {
-                throw new ArgumentException("Genre is required");
-            };
-            if (!ValidateDateTime(request.PublicationDate))
-            {
-                throw new ArgumentException("PublicationDate is required");
-            };
-            if (!ValidateString(request.AvailabilityStatus))
-            {
-                throw new ArgumentException("AvailabilityStatus is required");
-            };
-            if (!ValidateString(request.OtherDetails))
-            {
-                throw new ArgumentException("OtherDetails is required");
-            };
+          
        
          
         } 
@@ -185,6 +228,15 @@ namespace LibMgt.Services
        
          
         }
+        public void ValidateFineCreateRequest(FineCreateRequest request)
+        {
+           
+            if (request.PatronID == null)
+            {
+                throw new ArgumentException("PatronID is required");
+            };
 
+
+        }
     }
 }

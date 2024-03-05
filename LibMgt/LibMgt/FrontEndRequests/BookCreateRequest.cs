@@ -1,6 +1,6 @@
 ﻿namespace LibMgt.FrontEndRequests
 {
-    public record TransactionCreateRequest
+    public record BookCreateRequest
      (
      
          string Title ,

@@ -9,6 +9,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LibMgt.Controllers
 {
+    public record TransactionCreateRequest(Guid BookID, Guid PatronID, string? TransactionType, DateTime? TransactionDate, DateTime? DueDate, decimal? FineAmount, string? OtherDetails);
+    public record UpdateTransactionRequest(Guid Id,Guid? BookID, Guid PatronID, string? TransactionType, DateTime? TransactionDate, DateTime? DueDate, decimal? FineAmount, string? OtherDetails,bool? IsDeleted);
     [ApiController]
     [Route("api/transaction/[controller]")]
     public class TransactionsController : ControllerBase
@@ -122,7 +124,7 @@ namespace LibMgt.Controllers
             try
             {
                 bool check = false;
-                if(!_ValidationService.ValidateString(request.Id.ToString()))
+                if (!_ValidationService.ValidateString(request.Id.ToString()))
                 {
                     _logger.LogError("Id is required" + DateTime.UtcNow.ToString());
                     return BadRequest(new
@@ -132,7 +134,7 @@ namespace LibMgt.Controllers
                 }
 
                 Transaction transaction = await _context.Transactions.Where(x => x.Id == request.Id).FirstOrDefaultAsync();
-                if(transaction == null)
+                if (transaction == null)
                 {
                     _logger.LogError("transaction not found" + DateTime.UtcNow.ToString());
                     return NotFound(new
@@ -140,35 +142,51 @@ namespace LibMgt.Controllers
                         Message = "transaction not found"
                     });
                 }
-                if (_ValidationService.ValidateString(request.Title))
+                if (_ValidationService.ValidateString(request.TransactionType))
                 {
-                    if (!transaction.TransactionType.Equals(request.Title))
+                    if (!transaction.TransactionType.Equals(request.TransactionType))
                     {
-                        transaction.TransactionType = request.Title;
+                        transaction.TransactionType = request.TransactionType;
                         check = true;
                     }
                 }
-                if (_ValidationService.ValidateString(request.ISBN))
+                if (_ValidationService.ValidateDecimal(request.FineAmount))
                 {
-                    if (!transaction.FineAmount.Equals(request.ISBN))
+                    if (!transaction.FineAmount.Equals(request.FineAmount))
                     {
                         transaction.FineAmount = request.FineAmount;
                         check = true;
                     }
                 }
-                if (_ValidationService.ValidateString(request.Author))
+                if (request.PatronID!=null)
                 {
-                    if (!transaction.Author.Equals(request.Author))
+                    if (!transaction.PatronID.ToString().Equals(request.PatronID.ToString()))
                     {
-                        transaction.Author = request.Author;
+                        transaction.PatronID = request.PatronID;
                         check = true;
                     }
                 }
-                if (_ValidationService.ValidateString(request.AvailabilityStatus))
+                if (request.BookID!=null)
                 {
-                    if (!transaction.AvailabilityStatus.Equals(request.AvailabilityStatus))
+                    if (!transaction.BookID.ToString().Equals(request.BookID.ToString()))
                     {
-                        transaction.AvailabilityStatus = request.AvailabilityStatus;
+                        transaction.BookID = (Guid)request.BookID;
+                        check = true;
+                    }
+                }
+                if (_ValidationService.ValidateDateTime(request.DueDate))
+                {
+                    if (!transaction.DueDate.Equals(request.DueDate))
+                    {
+                        transaction.DueDate = request.DueDate;
+                        check = true;
+                    }
+                }
+                if (_ValidationService.ValidateDateTime(request.TransactionDate))
+                {
+                    if (!transaction.TransactionDate.Equals(request.TransactionDate))
+                    {
+                        transaction.TransactionDate = request.TransactionDate;
                         check = true;
                     }
                 }
@@ -180,10 +198,10 @@ namespace LibMgt.Controllers
                         check = true;
                     }
                 }
-                if (request.IsDeleted!=null)
+                if (request.IsDeleted != null)
                 {
-                    transaction.IsDeleted=(bool)request.IsDeleted;
-                    if (request.IsDeleted==true)
+                    transaction.IsDeleted = (bool)request.IsDeleted;
+                    if (request.IsDeleted == true)
                     {
                         transaction.DeletionTIme = DateTime.UtcNow;
                         check = true;
@@ -196,18 +214,14 @@ namespace LibMgt.Controllers
                         check = true;
                     }
                 }
-                if (_ValidationService.ValidateDateTime(request.PublicationDate))
-                {
-                    transaction.PublicationDate = request.PublicationDate;
-                    check = true;
-                }
+          
                 if (check)
                 {
                     transaction.LastModifiedTime = DateTime.UtcNow;
                     _context.Entry(transaction).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
                     _logger.LogInformation("transaction updated " + DateTime.UtcNow.ToString());
-                   
+
                 }
                 return Ok(new
                 {
