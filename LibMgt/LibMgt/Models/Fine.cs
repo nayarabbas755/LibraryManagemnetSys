@@ -3,9 +3,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LibMgt.Models
 {
-    public class Fine:BaseEntity
+    public class Fine : BaseEntity
     {
- 
+
         public Guid PatronID { get; set; }
         [ForeignKey("PatronID")]
         public virtual Patron Patron { get; set; }

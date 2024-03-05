@@ -10,47 +10,44 @@ using Microsoft.EntityFrameworkCore;
 namespace LibMgt.Controllers
 {
     [ApiController]
-    [Route("api/book/[controller]")]
-    public class BooksController : ControllerBase
+    [Route("api/fine/[controller]")]
+    public class FinesController : ControllerBase
     {
 
 
-        private readonly ILogger<BooksController> _logger;
+        private readonly ILogger<FinesController> _logger;
         private readonly LibraryDbContext _context;
         private readonly ValidationService _ValidationService;
 
-        public BooksController(ILogger<BooksController> logger,LibraryDbContext context,ValidationService validationService)
+        public FinesController(ILogger<FinesController> logger,LibraryDbContext context,ValidationService validationService)
         {
             _logger = logger;
             _context = context;
             _ValidationService = validationService;
         }
 
-        [HttpPost("CreateBook")]
+        [HttpPost("CreateFine")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> CreateBook(TransactionCreateRequest book)
+        public async Task<IActionResult> CreateFine(FineCreateRequest fine)
         {
             try
             {
-                 _ValidationService.ValidateTransactionCreateRequest(book);
-                var _book = new Book()
+                 _ValidationService.ValidateFineCreateRequest(fine);
+                var _fine = new Fine()
                 {
-                    Title = book.Title,
-                    Author = book.Author,
-                    ISBN = book.ISBN,
-                    Genre = book.Genre,
-                    PublicationDate = book.PublicationDate,
-                    AvailabilityStatus = book.AvailabilityStatus,
-                    OtherDetails = book.OtherDetails,
+                    FineAmount = fine.FineAmount,
+                    FineDate = fine.FineDate,
+                    Status = fine.Status,
+                    OtherDetails = fine.OtherDetails,
                     IsDeleted = false,
                     CreationTime = DateTime.UtcNow,
                 };
-                _context.Books.Add(_book);
+                _context.Fines.Add(_fine);
                 await _context.SaveChangesAsync();
-                _logger.LogInformation("Book created" + DateTime.UtcNow.ToString());
+                _logger.LogInformation("fine created" + DateTime.UtcNow.ToString());
                 return Ok(new
                 {
-                    book = _book
+                    fine = _fine
                 });
 
             }
@@ -64,16 +61,16 @@ namespace LibMgt.Controllers
 
         }
     
-        [HttpGet( "GetBooks")]
+        [HttpGet( "GetFines")]
         [Authorize(Roles = "Admin,User")]
-        public IActionResult GetBooks()
+        public IActionResult GetFines()
         {
             try
             {
-                _logger.LogInformation("Get books" + DateTime.UtcNow.ToString());
+                _logger.LogInformation("Get Fines" + DateTime.UtcNow.ToString());
                 return Ok(new
                 {
-                    books = _context.Books.Where(x => x.IsDeleted == false).ToList()
+                    fines = _context.Fines.Where(x => x.IsDeleted == false).ToList()
                 });
             }
             catch (Exception ex)
@@ -85,26 +82,26 @@ namespace LibMgt.Controllers
                 });
             }
         }
-        [HttpGet( "GetBookById/{Id:Guid}")]
+        [HttpGet( "GetfineById/{Id:Guid}")]
         [Authorize(Roles = "Admin,User")]
-        public async Task<IActionResult> GetBookById(Guid Id)
+        public async Task<IActionResult> GetFinById(Guid Id)
         {
             try
             {
-                var book = await _context.Books.Where(x => x.IsDeleted == false && x.Id==Id).FirstOrDefaultAsync();
-                if (book == null)
+                var fine = await _context.Fines.Where(x => x.IsDeleted == false && x.Id==Id).FirstOrDefaultAsync();
+                if (fine == null)
                 {
-                    _logger.LogError("Book not found" + DateTime.UtcNow.ToString());
+                    _logger.LogError("Fine not found" + DateTime.UtcNow.ToString());
                     return NotFound(new
                     {
-                        Message = "Book not found"
+                        Message = "Fine not found"
                     }) ;
                 }
 
-                _logger.LogInformation("Get books by id"+Id.ToString()+ " " + DateTime.UtcNow.ToString());
+                _logger.LogInformation("Get Fine by id"+Id.ToString()+ " " + DateTime.UtcNow.ToString());
                 return Ok(new
                 {
-                    books = book
+                    fines = fine
                 });
             }
             catch (Exception ex)
@@ -119,7 +116,7 @@ namespace LibMgt.Controllers
  
         [HttpPut( "update")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateDeleteBook(UpdateTransactionRequest request)
+        public async Task<IActionResult> UpdateDeleteFine(UpdateFineRequest request)
         {
             try
             {
@@ -133,87 +130,77 @@ namespace LibMgt.Controllers
                     });
                 }
 
-                Book book = await _context.Books.Where(x => x.Id == request.Id).FirstOrDefaultAsync();
-                if(book == null)
+                Fine fine = await _context.Fines.Where(x => x.Id == request.Id).FirstOrDefaultAsync();
+                if(fine == null)
                 {
-                    _logger.LogError("Book not found" + DateTime.UtcNow.ToString());
+                    _logger.LogError("fine not found" + DateTime.UtcNow.ToString());
                     return NotFound(new
                     {
-                        Message = "Book not found"
+                        Message = "fine not found"
                     });
                 }
                 if (_ValidationService.ValidateString(request.Title))
                 {
-                    if (!book.Title.Equals(request.Title))
+                    if (!fine.FineAmount.Equals(request.Title))
                     {
-                        book.Title = request.Title;
+                        fine.FineAmount = request.Title;
                         check = true;
                     }
                 }
                 if (_ValidationService.ValidateString(request.ISBN))
                 {
-                    if (!book.ISBN.Equals(request.ISBN))
+                    if (!fine.FineDate.Equals(request.ISBN))
                     {
-                        book.ISBN = request.ISBN;
+                        fine.FineDate = request.ISBN;
                         check = true;
                     }
                 }
                 if (_ValidationService.ValidateString(request.Author))
                 {
-                    if (!book.Author.Equals(request.Author))
+                    if (!fine.Status.Equals(request.Author))
                     {
-                        book.Author = request.Author;
+                        fine.Status = request.Author;
                         check = true;
                     }
                 }
-                if (_ValidationService.ValidateString(request.AvailabilityStatus))
-                {
-                    if (!book.AvailabilityStatus.Equals(request.AvailabilityStatus))
-                    {
-                        book.AvailabilityStatus = request.AvailabilityStatus;
-                        check = true;
-                    }
-                }
+
                 if (_ValidationService.ValidateString(request.OtherDetails))
                 {
-                    if (!book.OtherDetails.Equals(request.OtherDetails))
+                    if (!fine.OtherDetails.Equals(request.OtherDetails))
                     {
-                        book.OtherDetails = request.OtherDetails;
+                        fine.OtherDetails = request.OtherDetails;
                         check = true;
                     }
                 }
                 if (request.IsDeleted!=null)
                 {
-                    book.IsDeleted=(bool)request.IsDeleted;
+                    fine.IsDeleted=(bool)request.IsDeleted;
                     if (request.IsDeleted==true)
                     {
-                        book.DeletionTIme = DateTime.UtcNow;
+                        fine.DeletionTIme = DateTime.UtcNow;
                         check = true;
 
                     }
                     else
                     {
-                        book.DeletionTIme = null;
+                        fine.DeletionTIme = null;
 
                         check = true;
                     }
                 }
-                if (_ValidationService.ValidateDateTime(request.PublicationDate))
-                {
-                    book.PublicationDate = request.PublicationDate;
-                    check = true;
-                }
+                
                 if (check)
                 {
-                    book.LastModifiedTime = DateTime.UtcNow;
-                    _context.Entry(book).State = EntityState.Modified;
+                    fine.LastModifiedTime = DateTime.UtcNow;
+                    _context.Entry(fine).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
-                    _logger.LogInformation("Book updated " + DateTime.UtcNow.ToString());
+                    _logger.LogInformation("fine" +
+                        " updated " + DateTime.UtcNow.ToString());
                    
                 }
                 return Ok(new
                 {
-                    books = book
+                    fines = fine
                 });
             }
             catch (Exception ex)

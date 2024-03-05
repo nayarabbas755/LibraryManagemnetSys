@@ -118,7 +118,7 @@ namespace LibMgt.Services
             }
             return true;
         }
-        public void ValidateBookCreateRequest(BookCreateRequest request)
+        public void ValidateTransactionCreateRequest(TransactionCreateRequest request)
         {
            
             if (!ValidateString(request.Title))

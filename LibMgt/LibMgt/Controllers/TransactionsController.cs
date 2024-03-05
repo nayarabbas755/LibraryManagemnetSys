@@ -10,47 +10,45 @@ using Microsoft.EntityFrameworkCore;
 namespace LibMgt.Controllers
 {
     [ApiController]
-    [Route("api/book/[controller]")]
-    public class BooksController : ControllerBase
+    [Route("api/transaction/[controller]")]
+    public class TransactionsController : ControllerBase
     {
 
 
-        private readonly ILogger<BooksController> _logger;
+        private readonly ILogger<TransactionsController> _logger;
         private readonly LibraryDbContext _context;
         private readonly ValidationService _ValidationService;
 
-        public BooksController(ILogger<BooksController> logger,LibraryDbContext context,ValidationService validationService)
+        public TransactionsController(ILogger<TransactionsController> logger,LibraryDbContext context,ValidationService validationService)
         {
             _logger = logger;
             _context = context;
             _ValidationService = validationService;
         }
 
-        [HttpPost("CreateBook")]
+        [HttpPost("CreateTransactions")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> CreateBook(TransactionCreateRequest book)
+        public async Task<IActionResult> CreateTransaction(TransactionCreateRequest transaction)
         {
             try
             {
-                 _ValidationService.ValidateTransactionCreateRequest(book);
-                var _book = new Book()
+                 _ValidationService.ValidateTransactionCreateRequest(transaction);
+                var _transaction = new Transaction()
                 {
-                    Title = book.Title,
-                    Author = book.Author,
-                    ISBN = book.ISBN,
-                    Genre = book.Genre,
-                    PublicationDate = book.PublicationDate,
-                    AvailabilityStatus = book.AvailabilityStatus,
-                    OtherDetails = book.OtherDetails,
+                    TransactionType = transaction.TransactionType,
+                    TransactionDate = transaction.TransactionDate,
+                    DueDate = transaction.DueDate,
+                    FineAmount = transaction.FineAmount, 
+                    OtherDetails = transaction.OtherDetails,
                     IsDeleted = false,
                     CreationTime = DateTime.UtcNow,
                 };
-                _context.Books.Add(_book);
+                _context.Transactions.Add(_transaction);
                 await _context.SaveChangesAsync();
-                _logger.LogInformation("Book created" + DateTime.UtcNow.ToString());
+                _logger.LogInformation("transaction created" + DateTime.UtcNow.ToString());
                 return Ok(new
                 {
-                    book = _book
+                    transaction = _transaction
                 });
 
             }
@@ -64,16 +62,16 @@ namespace LibMgt.Controllers
 
         }
     
-        [HttpGet( "GetBooks")]
+        [HttpGet( "GetTransactions")]
         [Authorize(Roles = "Admin,User")]
-        public IActionResult GetBooks()
+        public IActionResult GetTransactions()
         {
             try
             {
-                _logger.LogInformation("Get books" + DateTime.UtcNow.ToString());
+                _logger.LogInformation("Get transaction" + DateTime.UtcNow.ToString());
                 return Ok(new
                 {
-                    books = _context.Books.Where(x => x.IsDeleted == false).ToList()
+                    tran = _context.Transactions.Where(x => x.IsDeleted == false).ToList()
                 });
             }
             catch (Exception ex)
@@ -85,26 +83,26 @@ namespace LibMgt.Controllers
                 });
             }
         }
-        [HttpGet( "GetBookById/{Id:Guid}")]
+        [HttpGet( "GetById/{Id:Guid}")]
         [Authorize(Roles = "Admin,User")]
-        public async Task<IActionResult> GetBookById(Guid Id)
+        public async Task<IActionResult> GetTransactionById(Guid Id)
         {
             try
             {
-                var book = await _context.Books.Where(x => x.IsDeleted == false && x.Id==Id).FirstOrDefaultAsync();
-                if (book == null)
+                var transaction = await _context.Transactions.Where(x => x.IsDeleted == false && x.Id==Id).FirstOrDefaultAsync();
+                if (transaction == null)
                 {
-                    _logger.LogError("Book not found" + DateTime.UtcNow.ToString());
+                    _logger.LogError("transaction not found" + DateTime.UtcNow.ToString());
                     return NotFound(new
                     {
-                        Message = "Book not found"
+                        Message = "transaction not found"
                     }) ;
                 }
 
-                _logger.LogInformation("Get books by id"+Id.ToString()+ " " + DateTime.UtcNow.ToString());
+                _logger.LogInformation("Get transaction by id" + Id.ToString()+ " " + DateTime.UtcNow.ToString());
                 return Ok(new
                 {
-                    books = book
+                    transactions = transaction
                 });
             }
             catch (Exception ex)
@@ -119,7 +117,7 @@ namespace LibMgt.Controllers
  
         [HttpPut( "update")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateDeleteBook(UpdateTransactionRequest request)
+        public async Task<IActionResult> UpdateDeleteTransaction(UpdateTransactionRequest request)
         {
             try
             {
@@ -133,87 +131,87 @@ namespace LibMgt.Controllers
                     });
                 }
 
-                Book book = await _context.Books.Where(x => x.Id == request.Id).FirstOrDefaultAsync();
-                if(book == null)
+                Transaction transaction = await _context.Transactions.Where(x => x.Id == request.Id).FirstOrDefaultAsync();
+                if(transaction == null)
                 {
-                    _logger.LogError("Book not found" + DateTime.UtcNow.ToString());
+                    _logger.LogError("transaction not found" + DateTime.UtcNow.ToString());
                     return NotFound(new
                     {
-                        Message = "Book not found"
+                        Message = "transaction not found"
                     });
                 }
                 if (_ValidationService.ValidateString(request.Title))
                 {
-                    if (!book.Title.Equals(request.Title))
+                    if (!transaction.TransactionType.Equals(request.Title))
                     {
-                        book.Title = request.Title;
+                        transaction.TransactionType = request.Title;
                         check = true;
                     }
                 }
                 if (_ValidationService.ValidateString(request.ISBN))
                 {
-                    if (!book.ISBN.Equals(request.ISBN))
+                    if (!transaction.FineAmount.Equals(request.ISBN))
                     {
-                        book.ISBN = request.ISBN;
+                        transaction.FineAmount = request.FineAmount;
                         check = true;
                     }
                 }
                 if (_ValidationService.ValidateString(request.Author))
                 {
-                    if (!book.Author.Equals(request.Author))
+                    if (!transaction.Author.Equals(request.Author))
                     {
-                        book.Author = request.Author;
+                        transaction.Author = request.Author;
                         check = true;
                     }
                 }
                 if (_ValidationService.ValidateString(request.AvailabilityStatus))
                 {
-                    if (!book.AvailabilityStatus.Equals(request.AvailabilityStatus))
+                    if (!transaction.AvailabilityStatus.Equals(request.AvailabilityStatus))
                     {
-                        book.AvailabilityStatus = request.AvailabilityStatus;
+                        transaction.AvailabilityStatus = request.AvailabilityStatus;
                         check = true;
                     }
                 }
                 if (_ValidationService.ValidateString(request.OtherDetails))
                 {
-                    if (!book.OtherDetails.Equals(request.OtherDetails))
+                    if (!transaction.OtherDetails.Equals(request.OtherDetails))
                     {
-                        book.OtherDetails = request.OtherDetails;
+                        transaction.OtherDetails = request.OtherDetails;
                         check = true;
                     }
                 }
                 if (request.IsDeleted!=null)
                 {
-                    book.IsDeleted=(bool)request.IsDeleted;
+                    transaction.IsDeleted=(bool)request.IsDeleted;
                     if (request.IsDeleted==true)
                     {
-                        book.DeletionTIme = DateTime.UtcNow;
+                        transaction.DeletionTIme = DateTime.UtcNow;
                         check = true;
 
                     }
                     else
                     {
-                        book.DeletionTIme = null;
+                        transaction.DeletionTIme = null;
 
                         check = true;
                     }
                 }
                 if (_ValidationService.ValidateDateTime(request.PublicationDate))
                 {
-                    book.PublicationDate = request.PublicationDate;
+                    transaction.PublicationDate = request.PublicationDate;
                     check = true;
                 }
                 if (check)
                 {
-                    book.LastModifiedTime = DateTime.UtcNow;
-                    _context.Entry(book).State = EntityState.Modified;
+                    transaction.LastModifiedTime = DateTime.UtcNow;
+                    _context.Entry(transaction).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
-                    _logger.LogInformation("Book updated " + DateTime.UtcNow.ToString());
+                    _logger.LogInformation("transaction updated " + DateTime.UtcNow.ToString());
                    
                 }
                 return Ok(new
                 {
-                    books = book
+                    transactions = transaction
                 });
             }
             catch (Exception ex)
