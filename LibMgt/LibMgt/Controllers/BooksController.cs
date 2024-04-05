@@ -38,7 +38,7 @@ namespace LibMgt.Controllers
                     Title = book.Title,
                     Author = book.Author,
                     ISBN = book.ISBN,
-                    Genre = book.Genre,
+                    Genre =  book.Genre,
                     PublicationDate = book.PublicationDate,
                     AvailabilityStatus = book.AvailabilityStatus,
                     OtherDetails = book.OtherDetails,
@@ -63,7 +63,19 @@ namespace LibMgt.Controllers
             }
 
         }
-    
+     
+        public static Genre GetGenreName(string genreId,LibDbContext.LibraryDbContext _context)
+        {
+            try
+            {
+                var name = _context.Genres.Where(y => y.Id == new Guid(genreId)).FirstOrDefault();
+                return name;
+            }
+            catch 
+            {
+                return null;
+            }
+                }
         [HttpGet( "GetBooks")]
         [Authorize(Roles = "Admin,User")]
         public IActionResult GetBooks()
@@ -73,7 +85,17 @@ namespace LibMgt.Controllers
                 _logger.LogInformation("Get books" + DateTime.UtcNow.ToString());
                 return Ok(new
                 {
-                    books = _context.Books.Where(x => x.IsDeleted == false).ToList()
+                    books = _context.Books.Where(x => x.IsDeleted == false).Select(x =>
+                    new {
+                        Title=x.Title,
+                        Author = x.Author,
+                        Genre= GetGenreName(x.Genre,_context) ,
+                        PublicationDate = x.PublicationDate,
+                        AvailabilityStatus = x.AvailabilityStatus,
+                        Id = x.Id,
+                        ISBN = x.ISBN,
+                        OtherDetails = x.OtherDetails
+                    }).AsEnumerable()
                 });
             }
             catch (Exception ex)
@@ -85,6 +107,8 @@ namespace LibMgt.Controllers
                 });
             }
         }
+    
+ 
         [HttpGet( "GetBookById/{Id:Guid}")]
         [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> GetBookById(Guid Id)
@@ -104,7 +128,18 @@ namespace LibMgt.Controllers
                 _logger.LogInformation("Get books by id"+Id.ToString()+ " " + DateTime.UtcNow.ToString());
                 return Ok(new
                 {
-                    books = book
+                    books = new 
+                    {
+                        Title = book.Title,
+                        Author = book.Author,
+                        Genre = GetGenreName(book.Genre, _context),
+                        PublicationDate = book.PublicationDate,
+                        AvailabilityStatus = book.AvailabilityStatus,
+                        Id = book.Id,
+                        ISBN = book.ISBN,
+                        OtherDetails = book.OtherDetails
+
+                    }
                 });
             }
             catch (Exception ex)
@@ -147,6 +182,14 @@ namespace LibMgt.Controllers
                     if (!book.Title.Equals(request.Title))
                     {
                         book.Title = request.Title;
+                        check = true;
+                    }
+                }
+                if (_ValidationService.ValidateString(request.Genre))
+                {
+                    if (!book.Genre.Equals(request.Genre))
+                    {
+                        book.Genre = request.Genre;
                         check = true;
                     }
                 }

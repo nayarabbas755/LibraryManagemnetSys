@@ -30,7 +30,7 @@ namespace LibMgt
                 options.Tokens.EmailConfirmationTokenProvider = TokenOptions.DefaultEmailProvider;
                 options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultEmailProvider;
                 options.Tokens.ChangeEmailTokenProvider = TokenOptions.DefaultEmailProvider;
-                options.SignIn.RequireConfirmedAccount = true;
+           
                 options.User.RequireUniqueEmail = true;
                 options.Lockout.MaxFailedAccessAttempts = 7;
                 options.Password.RequireDigit = true;

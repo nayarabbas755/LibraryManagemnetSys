@@ -7,8 +7,9 @@
       "applicationUrl": "http://localhost:43246",
       "sslPort": 44331
     }
-  },
+  }
   "profiles": {
+
     "http": {
       "commandName": "Project",
       "dotnetRunMessages": true,

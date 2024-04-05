@@ -14,6 +14,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
+using System.Data;
 
 namespace LibMgt.Controllers
 {
@@ -301,16 +302,17 @@ namespace LibMgt.Controllers
                 var result = await _signinManager.PasswordSignInAsync(user, request.Password, isPersistent: false, lockoutOnFailure: false);
                 if(result.Succeeded)
                 {
-                    if (user.EmailConfirmed == false)
-                    {
-                        _logger.LogError("Account not activated" + DateTime.UtcNow.ToString());
-                        return Unauthorized(new
-                        {
-                            Message = "Account not activated"
-                        });
-                    }
+                    //if (user.EmailConfirmed == false)
+                    //{
+                    //    _logger.LogError("Account not activated" + DateTime.UtcNow.ToString());
+                    //    return Unauthorized(new
+                    //    {
+                    //        Message = "Account not activated"
+                    //    });
+                    //}
                     var roles = await _userManager.GetRolesAsync(user);
-                   
+                 
+                 
                     return Ok(new
                     {
                         user = new
@@ -319,6 +321,7 @@ namespace LibMgt.Controllers
                             UserName = user.UserName,
                             Email = user.Email,
                             CreationTIme = user.CreationTime,
+                            Role= roles.FirstOrDefault(),
                             EmailConfirmed = user.EmailConfirmed,
                             Token = _jwtService.GenerateJWT(user,roles)
                         }
@@ -435,7 +438,38 @@ namespace LibMgt.Controllers
             }
         }
 
+        [HttpGet("me")]
+        [Authorize(Roles = "Admin,User")]
+        public async Task<IActionResult> me() { 
+            try
+            {
+                var email = HttpContext.User.Claims.Where(c => c.Type == ClaimTypes.NameIdentifier).First().Value;
+               var user = await _userManager.FindByEmailAsync(email);
 
+                var roles = await _userManager.GetRolesAsync(user);
+                return Ok(new 
+                    {
+                    user = new
+                    {
+                        Id = user.Id,
+                        UserName = user.UserName,
+                        Email = user.Email,
+                        Role = roles.FirstOrDefault(),
+                        CreationTIme = user.CreationTime,
+                        EmailConfirmed = user.EmailConfirmed
+                    }
+                }
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message + DateTime.UtcNow.ToString());
+                return BadRequest(new
+                {
+                    Message = ex.Message
+                });
+            }
+        }
         [HttpGet("GetUsers")]
         [Authorize(Roles = "Admin")]
         public IActionResult GetUsers()

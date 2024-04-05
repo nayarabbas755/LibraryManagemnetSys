@@ -198,36 +198,36 @@ namespace LibMgt.Services
        
          
         } 
-        public void ValidatePatronCreateRequest(CreatePatronRequest request)
-        {
+        //public void ValidatePatronCreateRequest(CreatePatronRequest request)
+        //{
            
-            if (!ValidateString(request.Name))
-            {
-                throw new ArgumentException("Password is required");
-            };
+        //    if (!ValidateString(request.Name))
+        //    {
+        //        throw new ArgumentException("Password is required");
+        //    };
        
-            if (!ValidateString(request.PhoneNumber))
-            {
-                throw new ArgumentException("PhoneNumber is required");
-            };
+        //    if (!ValidateString(request.PhoneNumber))
+        //    {
+        //        throw new ArgumentException("PhoneNumber is required");
+        //    };
        
-            if (!ValidateEmail(request.Email))
-            {
-                throw new ArgumentException("Invalid email");
-            };
+        //    if (!ValidateEmail(request.Email))
+        //    {
+        //        throw new ArgumentException("Invalid email");
+        //    };
        
-            if (!ValidateString(request.Address))
-            {
-                throw new ArgumentException("Address is required");
-            };
+        //    if (!ValidateString(request.Address))
+        //    {
+        //        throw new ArgumentException("Address is required");
+        //    };
           
-            if (!ValidateString(request.OtherDetails))
-            {
-                throw new ArgumentException("OtherDetails is required");
-            };
+        //    if (!ValidateString(request.OtherDetails))
+        //    {
+        //        throw new ArgumentException("OtherDetails is required");
+        //    };
        
          
-        }
+        //}
         public void ValidateFineCreateRequest(FineCreateRequest request)
         {
            
