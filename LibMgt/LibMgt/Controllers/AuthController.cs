@@ -479,15 +479,16 @@ namespace LibMgt.Controllers
                 _logger.LogInformation("Get users" + DateTime.UtcNow.ToString());
                 return Ok(new
                 {
-                    users = _context.Users.Select(user=>new
-                    {
-                        Id = user.Id,
-                        UserName = user.UserName,
-                        Email = user.Email,
-                        CreationTIme = user.CreationTime,
-                        EmailConfirmed = user.EmailConfirmed,
+                    //s.Select(user => new
+                    //{
+                    //    Id = user.Id,
+                    //    UserName = user.UserName,
+                    //    Email = user.Email,
+                    //    CreationTIme = user.CreationTime,
+                    //    EmailConfirmed = user.EmailConfirmed,
 
-                    }).ToList()
+                    //}).
+                    users = _context.User.Where(x=>x.IsDeleted==false).ToList()
                 });
             }
             catch (Exception ex)

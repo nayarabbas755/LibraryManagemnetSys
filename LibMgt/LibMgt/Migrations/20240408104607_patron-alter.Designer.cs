@@ -3,6 +3,7 @@ using System;
 using LibMgt.LibDbContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibMgt.Migrations
 {
     [DbContext(typeof(LibraryDbContext))]
-    partial class LibraryDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240408104607_patron-alter")]
+    partial class patronalter
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.2");
@@ -204,11 +207,16 @@ namespace LibMgt.Migrations
                     b.Property<string>("Status")
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid>("UserID")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("BookID");
 
                     b.HasIndex("PatronID");
+
+                    b.HasIndex("UserID");
 
                     b.ToTable("Reservations");
                 });
@@ -509,9 +517,17 @@ namespace LibMgt.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("LibMgt.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Book");
 
                     b.Navigation("Patron");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("LibMgt.Models.Transaction", b =>

@@ -41,6 +41,7 @@ namespace LibMgt.Controllers
                     FineAmount = fine.FineAmount,
                     FineDate = fine.FineDate,
                     Status = fine.Status,
+                    PatronID  = fine.PatronID,
                     OtherDetails = fine.OtherDetails,
                     IsDeleted = false,
                     CreationTime = DateTime.UtcNow,
@@ -73,7 +74,23 @@ namespace LibMgt.Controllers
                 _logger.LogInformation("Get Fines" + DateTime.UtcNow.ToString());
                 return Ok(new
                 {
-                    fines = _context.Fines.Where(x => x.IsDeleted == false).ToList()
+                    fines = _context.Fines.Where(x => x.IsDeleted == false).Include(x=>x.Patron).Select(x=>new Fine
+                    {
+                        Id=x.Id,
+                        FineAmount = x.FineAmount,
+                        FineDate = x.FineDate,
+                        OtherDetails = x.OtherDetails,
+                        IsDeleted = false,
+                        Status = x.Status,
+                        Patron = new ()
+                        {
+                            Id=x.Patron.Id,
+                            Email =x.Patron.Email,
+                            UserName =x.Patron.UserName,
+                            EmailConfirmed =x.Patron.EmailConfirmed,
+                            CreationTime =x.Patron.CreationTime,
+                        }
+                    }).ToList()
                 });
             }
             catch (Exception ex)
@@ -87,11 +104,27 @@ namespace LibMgt.Controllers
         }
         [HttpGet( "GetfineById/{Id:Guid}")]
         [Authorize(Roles = "Admin,User")]
-        public async Task<IActionResult> GetFinById(Guid Id)
+        public async Task<IActionResult> GetFineById(Guid Id)
         {
             try
             {
-                var fine = await _context.Fines.Where(x => x.IsDeleted == false && x.Id==Id).FirstOrDefaultAsync();
+                var fine = await _context.Fines.Where(x => x.IsDeleted == false && x.Id==Id).Include(x=>x.Patron).Select(x => new Fine
+                {
+                    Id = x.Id,
+                    PatronID = x.PatronID,
+                    FineAmount = x.FineAmount,
+                    FineDate = x.FineDate,
+                    OtherDetails = x.OtherDetails,
+                    IsDeleted = false,
+                    Status = x.Status,
+                    Patron = new() { 
+                        Id = x.Patron.Id,
+                        Email = x.Patron.Email,
+                        UserName = x.Patron.UserName,
+                        EmailConfirmed = x.Patron.EmailConfirmed,
+                        CreationTime = x.Patron.CreationTime,
+                    }
+                }).FirstOrDefaultAsync();
                 if (fine == null)
                 {
                     _logger.LogError("Fine not found" + DateTime.UtcNow.ToString());

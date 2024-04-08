@@ -11,12 +11,10 @@ namespace LibMgt.Models
         public virtual Book Book { get; set; }
         public Guid PatronID { get; set; }
         [ForeignKey("PatronID")]
-        public virtual Patron Patron { get; set; }
+        public virtual User Patron { get; set; }
         public DateTime? ReservationDate { get; set; }
         public string? Status { get; set; }
         public string? OtherDetails { get; set; }
-        public Guid UserID { get; set; }
-        [ForeignKey("UserID")]
-        public virtual User User { get; set; }
+   
     }
 }

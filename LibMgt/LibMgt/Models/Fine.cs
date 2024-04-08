@@ -8,7 +8,7 @@ namespace LibMgt.Models
 
         public Guid PatronID { get; set; }
         [ForeignKey("PatronID")]
-        public virtual Patron Patron { get; set; }
+        public virtual User Patron { get; set; }
         public decimal? FineAmount { get; set; }
         public DateTime? FineDate { get; set; }
         public string? Status { get; set; }

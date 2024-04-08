@@ -59,7 +59,7 @@ namespace LibMgt.Controllers
                     IsDeleted=false,
                     ReservationDate = request.ReservationDate,
                     CreationTime = DateTime.UtcNow,
-                    UserID = request.UserId
+                  
 
                 };
                 _context.Reservations.Add(reservation);
@@ -87,7 +87,7 @@ namespace LibMgt.Controllers
                 _logger.LogInformation("Get reservations" + DateTime.UtcNow.ToString());
                 return Ok(new
                 {
-                    reservations = _context.Reservations.Include(x=>x.Patron).Include(x=>x.Book).Include(x=>x.User).ToList()
+                    reservations = _context.Reservations.Include(x=>x.Patron).Include(x=>x.Book).Include(x=>x.Patron).ToList()
                 });
             }
             catch (Exception ex)
@@ -108,7 +108,7 @@ namespace LibMgt.Controllers
                 var email = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 return Ok(new
                 {
-                    reservations = _context.Reservations.Include(x=>x.Patron).Include(x=>x.Book).Include(x=>x.User).Where(x => x.IsDeleted == false && x.User.Email.Equals(email) ).ToList()
+                    reservations = _context.Reservations.Include(x=>x.Patron).Include(x=>x.Book).Where(x => x.IsDeleted == false && x.Patron.Email.Equals(email) ).ToList()
                 });
             }
             catch (Exception ex)
