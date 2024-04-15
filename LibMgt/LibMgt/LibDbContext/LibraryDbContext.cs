@@ -18,7 +18,6 @@ namespace LibMgt.LibDbContext
         public DbSet<User> User { get; set; }
         public DbSet<Role> Role { get; set; }
         public DbSet<Book> Books { get; set; }
-        public DbSet<Patron> Patrons { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<Reservation> Reservations { get; set; }
         public DbSet<Fine> Fines { get; set; }

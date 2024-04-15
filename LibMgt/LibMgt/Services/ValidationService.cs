@@ -147,10 +147,7 @@ namespace LibMgt.Services
             {
                 throw new ArgumentException("OtherDetails is required");
             };
-            if (request.UserId==null)
-            {
-                throw new ArgumentException("UserId is required");
-            };
+    
 
         }
         public void ValidateLoginRequest(LoginRequest request)

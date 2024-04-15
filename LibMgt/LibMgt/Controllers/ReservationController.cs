@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 namespace LibMgt.Controllers
 {
-    public record CreateReservationRequest(Guid BookId, Guid PatronID, DateTime ReservationDate, string Status, string OtherDetails,Guid UserId);
+    public record CreateReservationRequest(Guid BookId, Guid PatronID, DateTime ReservationDate, string Status, string OtherDetails);
     [Route("api/reservation/[controller]")]
     [ApiController]
     public class ReservationController : ControllerBase
@@ -40,7 +40,7 @@ namespace LibMgt.Controllers
                         Message = "Book not found"
                     });
                 }
-                var patron = await _context.Patrons.Where(x=>x.Id==request.PatronID).FirstOrDefaultAsync();
+                var patron = await _context.User.Where(x=>x.Id==request.PatronID).FirstOrDefaultAsync();
                 if(patron==null)
                 {
                     _logger.LogError("Patron not found" + DateTime.UtcNow.ToString());
@@ -87,7 +87,7 @@ namespace LibMgt.Controllers
                 _logger.LogInformation("Get reservations" + DateTime.UtcNow.ToString());
                 return Ok(new
                 {
-                    reservations = _context.Reservations.Include(x=>x.Patron).Include(x=>x.Book).Include(x=>x.Patron).ToList()
+                    reservations = _context.Reservations.Include(x=>x.Book).Include(x=>x.Patron).ToList()
                 });
             }
             catch (Exception ex)

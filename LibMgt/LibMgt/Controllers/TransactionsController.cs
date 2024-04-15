@@ -41,6 +41,8 @@ namespace LibMgt.Controllers
                     TransactionDate = transaction.TransactionDate,
                     DueDate = transaction.DueDate,
                     FineAmount = transaction.FineAmount, 
+                    BookID=transaction.BookID,
+                    PatronID=transaction.PatronID,
                     OtherDetails = transaction.OtherDetails,
                     IsDeleted = false,
                     CreationTime = DateTime.UtcNow,
@@ -73,7 +75,7 @@ namespace LibMgt.Controllers
                 _logger.LogInformation("Get transaction" + DateTime.UtcNow.ToString());
                 return Ok(new
                 {
-                    tran = _context.Transactions.Where(x => x.IsDeleted == false).ToList()
+                    tran = _context.Transactions.Include(x => x.Book).Include(x => x.Patron).Where(x => x.IsDeleted == false).ToList()
                 });
             }
             catch (Exception ex)
@@ -91,7 +93,7 @@ namespace LibMgt.Controllers
         {
             try
             {
-                var transaction = await _context.Transactions.Where(x => x.IsDeleted == false && x.Id==Id).FirstOrDefaultAsync();
+                var transaction = await _context.Transactions.Include(x => x.Book).Include(x => x.Patron).Where(x => x.IsDeleted == false && x.Id==Id).FirstOrDefaultAsync();
                 if (transaction == null)
                 {
                     _logger.LogError("transaction not found" + DateTime.UtcNow.ToString());
@@ -104,7 +106,7 @@ namespace LibMgt.Controllers
                 _logger.LogInformation("Get transaction by id" + Id.ToString()+ " " + DateTime.UtcNow.ToString());
                 return Ok(new
                 {
-                    transactions = transaction
+                    tran = transaction
                 });
             }
             catch (Exception ex)
