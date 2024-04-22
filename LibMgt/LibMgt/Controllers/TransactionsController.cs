@@ -4,8 +4,10 @@ using LibMgt.Models;
 using LibMgt.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace LibMgt.Controllers
 {
@@ -15,16 +17,17 @@ namespace LibMgt.Controllers
     [Route("api/transaction/[controller]")]
     public class TransactionsController : ControllerBase
     {
-
+        private readonly UserManager<User> _userManager;
 
         private readonly ILogger<TransactionsController> _logger;
         private readonly LibraryDbContext _context;
         private readonly ValidationService _ValidationService;
 
-        public TransactionsController(ILogger<TransactionsController> logger,LibraryDbContext context,ValidationService validationService)
+        public TransactionsController(ILogger<TransactionsController> logger,LibraryDbContext context,ValidationService validationService, UserManager<User> userManager)
         {
             _logger = logger;
             _context = context;
+            _userManager = userManager;
             _ValidationService = validationService;
         }
 
@@ -68,15 +71,28 @@ namespace LibMgt.Controllers
     
         [HttpGet( "GetTransactions")]
         [Authorize(Roles = "Admin,User")]
-        public IActionResult GetTransactions()
+        public async Task<IActionResult> GetTransactions()
         {
             try
             {
                 _logger.LogInformation("Get transaction" + DateTime.UtcNow.ToString());
+                var email = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var user = await _userManager.FindByEmailAsync(email);
+                var role = await _userManager.GetRolesAsync(user);
+       
+                if (role.IndexOf("Admin")>=0) { 
                 return Ok(new
                 {
                     tran = _context.Transactions.Include(x => x.Book).Include(x => x.Patron).Where(x => x.IsDeleted == false).ToList()
                 });
+                }
+                else
+                {
+                    return Ok(new
+                    {
+                        tran = _context.Transactions.Include(x => x.Book).Include(x => x.Patron).Where(x => x.IsDeleted == false && x.PatronID==user.Id).ToList()
+                    });
+                }
             }
             catch (Exception ex)
             {

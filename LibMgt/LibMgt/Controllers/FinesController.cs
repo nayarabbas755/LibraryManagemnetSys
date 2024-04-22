@@ -4,8 +4,10 @@ using LibMgt.Models;
 using LibMgt.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace LibMgt.Controllers
 {
@@ -21,12 +23,14 @@ namespace LibMgt.Controllers
         private readonly ILogger<FinesController> _logger;
         private readonly LibraryDbContext _context;
         private readonly ValidationService _ValidationService;
+        private readonly UserManager<User> _userManager;
 
-        public FinesController(ILogger<FinesController> logger,LibraryDbContext context,ValidationService validationService)
+        public FinesController(ILogger<FinesController> logger,LibraryDbContext context,ValidationService validationService,UserManager<User> userManager)
         {
             _logger = logger;
             _context = context;
             _ValidationService = validationService;
+            _userManager = userManager;
         }
 
         [HttpPost("CreateFine")]
@@ -67,31 +71,63 @@ namespace LibMgt.Controllers
     
         [HttpGet( "GetFines")]
         [Authorize(Roles = "Admin,User")]
-        public IActionResult GetFines()
+        public async Task<IActionResult> GetFines()
         {
             try
             {
                 _logger.LogInformation("Get Fines" + DateTime.UtcNow.ToString());
-                return Ok(new
+                var email = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var user = await _userManager.FindByEmailAsync(email);
+                var role = await _userManager.GetRolesAsync(user);
+
+                if (role.IndexOf("Admin") >= 0)
                 {
-                    fines = _context.Fines.Where(x => x.IsDeleted == false).Include(x=>x.Patron).Select(x=>new Fine
+
+                    return Ok(new
                     {
-                        Id=x.Id,
-                        FineAmount = x.FineAmount,
-                        FineDate = x.FineDate,
-                        OtherDetails = x.OtherDetails,
-                        IsDeleted = false,
-                        Status = x.Status,
-                        Patron = new ()
+                        fines = _context.Fines.Where(x => x.IsDeleted == false).Include(x => x.Patron).Select(x => new Fine
                         {
-                            Id=x.Patron.Id,
-                            Email =x.Patron.Email,
-                            UserName =x.Patron.UserName,
-                            EmailConfirmed =x.Patron.EmailConfirmed,
-                            CreationTime =x.Patron.CreationTime,
-                        }
-                    }).ToList()
-                });
+                            Id = x.Id,
+                            FineAmount = x.FineAmount,
+                            FineDate = x.FineDate,
+                            OtherDetails = x.OtherDetails,
+                            IsDeleted = false,
+                            Status = x.Status,
+                            Patron = new()
+                            {
+                                Id = x.Patron.Id,
+                                Email = x.Patron.Email,
+                                UserName = x.Patron.UserName,
+                                EmailConfirmed = x.Patron.EmailConfirmed,
+                                CreationTime = x.Patron.CreationTime,
+                            }
+                        }).ToList()
+                    });
+                }
+                else
+                {
+                    return Ok(new
+                    {
+                        fines = _context.Fines.Where(x => x.IsDeleted == false && x.PatronID==user.Id).Include(x => x.Patron).Select(x => new Fine
+                        {
+                            Id = x.Id,
+                            FineAmount = x.FineAmount,
+                            FineDate = x.FineDate,
+                            OtherDetails = x.OtherDetails,
+                            IsDeleted = false,
+                            Status = x.Status,
+                            Patron = new()
+                            {
+                                Id = x.Patron.Id,
+                                Email = x.Patron.Email,
+                                UserName = x.Patron.UserName,
+                                EmailConfirmed = x.Patron.EmailConfirmed,
+                                CreationTime = x.Patron.CreationTime,
+                            }
+                        }).ToList()
+                    });
+
+                }
             }
             catch (Exception ex)
             {

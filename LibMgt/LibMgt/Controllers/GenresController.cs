@@ -3,6 +3,7 @@ using LibMgt.Models;
 using LibMgt.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,6 +19,7 @@ namespace LibMgt.Controllers
         private readonly ILogger<GenresController> _logger;
         private readonly LibraryDbContext _context;
         private readonly ValidationService _ValidationService;
+        
 
         public GenresController(ILogger<GenresController> logger, LibraryDbContext context, ValidationService validationService)
         {
